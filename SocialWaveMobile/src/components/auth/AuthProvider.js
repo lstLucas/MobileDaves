@@ -21,7 +21,7 @@ const AuthProvider = ( { children } )=>{
             return vuLogin
         }else{
             const vu = await getData(login);
-            const adminRole = await isAdmin(vu.id);
+            const adminRole = await checkAdmin(vu.id);
 
             setUser({ username: vu.userName,
                             login: vu.email,
@@ -33,14 +33,24 @@ const AuthProvider = ( { children } )=>{
     }
 
     const logout = ()=>{
-        setUser(null)
+        setUser(null);
+    }
+    
+    const userType = ()=>{
+        if(user === null)
+            return null;
+        return user.profile;
     }
 
-    const isCliente = (id) => {
-        return isAdmin(id); 
-    };
+    const isMember = ()=>{
+        return userType() === 'Member'
+    }
+    const isAdmin = ()=>{
+        return userType() === 'Admin'
+    }
 
-    const isAdmin = async (id) => {
+
+    const checkAdmin = async (id) => {
         try {
             const adminStatus = await checkUserAdmin(id);
             return adminStatus;
@@ -52,11 +62,11 @@ const AuthProvider = ( { children } )=>{
 
     return(
         <AuthContext.Provider value={{user, login, logout, 
-        isCliente, isAdmin }}>
+        isMember, isAdmin }}>
             {children}
         </AuthContext.Provider>
     )
 
 } 
 
-export {useAuth, AuthProvider}
+export { useAuth, AuthProvider }

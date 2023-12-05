@@ -2,18 +2,25 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Image, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { TextInput, Button, Title, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { HeaderBackButton } from '@react-navigation/stack';
+import { useAuth } from '../../components/auth/AuthProvider';
+import { createUser } from '../../service/ServiceUtil';
+
 
 const Signup = () => {
     const navigation = useNavigation();
     const [credentials, setCredentials] = useState({ email: '', password: '', username: '' });
     const [msg, setMsg] = useState('');
 
-    const signUp = () => {
-        console.log("tentou");
+    const { isAdmin } = useAuth();
+
+    const signUp =  () => {
+        if(isAdmin())
+            createUser(credentials, true);
+        else
+            createUser(credentials, false);
     };
 
-    const alterarCampo = (name, value) => {
+    const changeField = (name, value) => {
         let obj = { ...credentials };
         obj[name] = value;
         setCredentials(obj);
@@ -21,7 +28,7 @@ const Signup = () => {
 
     const dismissKeyboard = () => {
         Keyboard.dismiss();
-    };
+    };    
 
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
@@ -43,22 +50,24 @@ const Signup = () => {
                     <TextInput
                         label="E-mail"
                         value={credentials.email}
-                        onChangeText={(text) => alterarCampo('email', text)}
+                        onChangeText={(text) => changeField('email', text)}
                         style={styles.input}
                         placeholder="e.g., lstemail@example.com"
+                        textContentType='oneTimeCode'
                     />
                     <TextInput
                         label="Password"
                         value={credentials.password}
-                        onChangeText={(text) => alterarCampo('password', text)}
+                        onChangeText={(text) => changeField('password', text)}
                         secureTextEntry
                         style={styles.input}
                         placeholder="e.g., ********"
+                        textContentType='oneTimeCode'
                     />
                     <TextInput
                         label="Username"
                         value={credentials.username}
-                        onChangeText={(text) => alterarCampo('username', text)}
+                        onChangeText={(text) => changeField('username', text)}
                         style={styles.input}
                         placeholder="e.g., lsteixeira"
                     />

@@ -3,7 +3,7 @@ import { View, StyleSheet, Image, KeyboardAvoidingView, TouchableWithoutFeedback
 import { TextInput, Button, Title, Text } from 'react-native-paper';
 import { useAuth } from "../../components/auth/AuthProvider"
 import { useNavigation } from '@react-navigation/native';
-import { CustomSideBar } from '../../components/sidebar/Sidebar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
     const navigation = useNavigation();
@@ -15,7 +15,8 @@ const Login = () => {
     const signIn = async () => {
         const resp = await login(credentials.email, credentials.password)
         if (resp) {
-            navigation.navigate('loginScreen')
+            await AsyncStorage.setItem('email', credentials.email);
+            navigation.navigate('feedScreen')
         } else {
             setCredentials({ login: "", password: "" })
             setMsg("Incorrect E-mail or Password!")
@@ -24,7 +25,7 @@ const Login = () => {
     }
 
 
-    const alterarCampo = (name, value) => {
+    const changeField = (name, value) => {
         let obj = { ...credentials };
         obj[name] = value;
         setCredentials(obj);
@@ -40,10 +41,11 @@ const Login = () => {
 
     return (
         <TouchableWithoutFeedback onPress={dismissKeyboard}>
-            <View style={styles.container}>
-                {/* <KeyboardAvoidingView
+                <KeyboardAvoidingView
+                    style={styles.container}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                > */}
+                    
+                >
                     {(msg != '') &&
                         <Text style={{ color: 'red' }}>{msg}</Text>
                     }
@@ -57,17 +59,19 @@ const Login = () => {
                         <TextInput
                             label="E-mail"
                             value={credentials.email}
-                            onChangeText={(text) => alterarCampo('email', text)}
+                            onChangeText={(text) => changeField('email', text)}
                             style={styles.input}
                             placeholder="e.g., Lsteixeira@email.com"
+                            textContentType='oneTimeCode'
                         />
                         <TextInput
                             label="Password"
                             value={credentials.password}
-                            onChangeText={(text) => alterarCampo('password', text)}
+                            onChangeText={(text) => changeField('password', text)}
                             secureTextEntry
                             style={styles.input}
                             placeholder="e.g., ******"
+                            textContentType='oneTimeCode'
                         />
                         <Button
                             mode="contained"
@@ -85,8 +89,7 @@ const Login = () => {
                         </Text>
 
                     </View>
-                {/* </KeyboardAvoidingView> */}
-            </View>
+                </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     );
 };
