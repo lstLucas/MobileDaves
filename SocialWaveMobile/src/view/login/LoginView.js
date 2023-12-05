@@ -19,9 +19,7 @@ const Login = () => {
     const signIn = async () => {
         const resp = await login(credentials.email, credentials.password)
         if (resp) {
-            if(AsyncStorage.getItem('email') != null){
-                await AsyncStorage.clear();
-            }
+            AsyncStorage.clear;
             await AsyncStorage.setItem('email', credentials.email);
             navigation.navigate('feedScreen')
         } else {

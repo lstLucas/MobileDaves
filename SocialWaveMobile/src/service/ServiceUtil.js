@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const URL = "http://17dc-2804-d45-9b1a-ca00-215-fe9c-e514-cef6.ngrok.io"
+const URL = "http://e640-2804-d45-9b1a-ca00-215-fe9c-e514-cef6.ngrok.io"
 
 const login = async (login, password) => {
   const apiUrl = `${URL}/api/User/Login`;
@@ -220,8 +220,6 @@ async function checkIfUserLikedPost(userId, postId) {
         'Content-Type': 'application/json',
       },
     });
-
-    console.log(response.status);
     if (response.status === 404) {
       return false;
     } else if (response.status === 200) {
@@ -236,33 +234,59 @@ async function checkIfUserLikedPost(userId, postId) {
 }
 
 const createPost = async (post) => {
-
+  console.log(JSON.stringify(post));
   try {
-      const p = await fetch(`${URL}/api/Post`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(post)
-      })
-        .then((resp) => {
-          if (resp.status == 201) {
-            return true
-          } else {
-            return false
-          }
-        })
-        .catch((error) => {
-          console.log(error)
+    const p = await fetch(`${URL}/api/Post`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(post)
+    })
+      .then((resp) => {
+        console.log(resp.status);
+        if (resp.status == 201) {
+          return true
+        } else {
           return false
-        })
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        return false
+      })
 
-      return p
+    return p
 
   } catch {
-    console.error('Wrong token sent to database')
+    console.error('Error on post creation')
   }
 }
+
+const deletePost = async (postId) => {
+  try {
+    const response = await fetch(`${URL}/api/Post/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log(postId);
+
+    if (!response.ok) {
+      throw new Error('Post not deteled!');
+    }
+
+    if (response.status === 200) {
+      return 'Post Deleted successfully';
+    } else {
+      throw new Error('Error deleting the post');
+    }
+  } catch (error) {
+    console.error('Error ocurred:', error);
+    return 'Error deleting user';
+  }
+};
 
 
 async function likePost(postId, userId) {
@@ -289,5 +313,7 @@ async function likePost(postId, userId) {
 
 
 
-export { login, createUser, getData, getAllMembers, checkUserAdmin, deleteUser,
-   getAllPosts, checkIfUserLikedPost, likePost, createPost }
+export {
+  login, createUser, getData, getAllMembers, checkUserAdmin, deleteUser,
+  getAllPosts, checkIfUserLikedPost, likePost, createPost, deletePost
+}

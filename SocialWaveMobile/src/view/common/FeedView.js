@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { TextInput, Button, List, Title, Paragraph, Card, IconButton, Text} from 'react-native-paper';
-import { createPost, getAllPosts, getData, likePost } from '../../service/ServiceUtil';
+import { TextInput, Button, List, Title, Paragraph, Card, IconButton, Text } from 'react-native-paper';
+import { createPost, getAllPosts, getData, likePost, deletePost } from '../../service/ServiceUtil';
 import LikeButton from '../../components/likebutton/LikeButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -13,20 +13,23 @@ const FeedScreen = () => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const liked = useSharedValue(0);
+    const [filterByLikes, setFilterByLikes] = useState(false);
+
+    
 
     useEffect(() => {
         const fetchData = async () => {
 
             try {
                 reloadPosts();
-    
+
                 const email = await AsyncStorage.getItem('email');
                 const data = await getData(email);
                 setUserData(data);
             } catch (error) {
                 console.error('Erro ao obter posts:', error);
             }
-    
+
         };
 
         fetchData();
@@ -44,36 +47,68 @@ const FeedScreen = () => {
 
     const handleLikeFunc = async (postId, userId) => {
         liked.value = withSpring(liked.value ? 0 : 1);
-    
+
         try {
-          const likeResponse = await likePost(postId, userId);
-      
-          if (likeResponse) {
-            console.log(true);
-            await reloadPosts();
-          } else {
-            console.error('Falha ao curtir o post');
-          }
+            const likeResponse = await likePost(postId, userId);
+            
+
+            if (likeResponse) {
+                console.log(true);
+                await reloadPosts();
+            } else {
+                console.error('Falha ao curtir o post');
+            }
         } catch (error) {
-          console.error('Ocorreu um erro:', error);
-        }
-      };
-    
-
-    const addPost = () => {
-        if (title.trim() !== '' && body.trim() !== '') {
-            const newPost = {
-                title: title,
-                body: body,
-                author: '',
-                likes: 0,
-            };
-
-            setPosts([...posts, newPost]);
-            setTitle('');
-            setBody('');
+            console.error('Ocorreu um erro:', error);
         }
     };
+
+    const handleFilterByLikes = () => {
+        setFilterByLikes(!filterByLikes);
+    };
+
+    const filteredPosts = filterByLikes
+        ? posts.slice().sort((a, b) => b.likes - a.likes)
+        : posts;
+
+    const handleDeletePost = async (postId) => {
+        try {
+            const response = await deletePost(postId);
+
+            if (response) {
+                console.log("Post Deleted");
+                await reloadPosts();
+            } else {
+                console.error('Error deleting this post');
+            }
+        } catch (error) {
+            console.error('Ocorreu um erro:', error);
+        }
+    }
+
+
+    const addPost = async () => {
+        if (title.trim() !== '' && body.trim() !== '') {
+            const newPost = {
+                id: Date.now().toString(),
+                title: title,
+                body: body,
+                likes: 0,
+                authorId: userData.id,
+                authorName: userData.userName,
+            };
+
+            const postAdded = await createPost(newPost);
+            console.log(newPost, postAdded);
+    
+            if (postAdded === true) {
+                await reloadPosts();
+            } else {
+                console.log('Erro ao adicionar o post.');
+            }
+        }
+    };
+    
 
 
 
@@ -101,9 +136,13 @@ const FeedScreen = () => {
                 </Button>
             </Card>
 
+            <Button mode="contained" onPress={handleFilterByLikes} style={{ marginBottom: 20 }}>
+                {filterByLikes ? 'Show All Posts' : 'Filter by Likes'}
+            </Button>
+
             <ScrollView style={styles.container}>
                 <Title style={{ textAlign: 'center' }}>POSTS</Title>
-                {userData != null && posts != null && posts.map((post, index) => (
+                {userData != null && filteredPosts != null && filteredPosts.map((post, index) => (
                     <View style={styles.postContainer} key={index}>
                         <Title style={styles.postTitle}>{post.title}</Title>
                         <List.Item
@@ -114,14 +153,14 @@ const FeedScreen = () => {
                                     <Paragraph style={styles.author}>{`Autor: ${post.authorName}`}</Paragraph>
                                     <View style={styles.likesContainer}>
                                         <Paragraph style={styles.likes}>{`Likes: ${post.likes}`}</Paragraph>
-                                        <LikeButton status={{userId: userData.id, postId: post.id}}  
-                                        handleLike={handleLikeFunc}
+                                        <LikeButton status={{ userId: userData.id, postId: post.id }}
+                                            handleLike={handleLikeFunc}
                                         />
-                                        {post.authorId === userData.id && ( 
+                                        {post.authorId === userData.id && (
                                             <IconButton
-                                                icon="delete" 
+                                                icon="delete"
                                                 color="#FF0000"
-                                                // onPress={() => handleDeletePost(index)} 
+                                                onPress={() => handleDeletePost(post.id)} 
                                             />
                                         )}
                                     </View>
@@ -133,7 +172,7 @@ const FeedScreen = () => {
             </ScrollView>
         </View>
     );
-    
+
 };
 
 const styles = StyleSheet.create({

@@ -23,7 +23,7 @@ export default LikeButton = ({status, handleLike}) => {
       liked.value = likedStatus ? 1 : 0;
     }
     checkLikeStatus();
-  },);
+  },[]);
   
 
   const outlineStyle = useAnimatedStyle(() => {
