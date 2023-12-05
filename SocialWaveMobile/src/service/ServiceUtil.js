@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const URL = "http://e640-2804-d45-9b1a-ca00-215-fe9c-e514-cef6.ngrok.io"
+const URL = "http://6623-2804-d45-9b1a-ca00-215-fe9c-e514-cef6.ngrok.io"
 
 const login = async (login, password) => {
   const apiUrl = `${URL}/api/User/Login`;
@@ -51,6 +51,45 @@ const getData = async (email) => {
     return null;
   }
 }
+
+const getPostsQtandLikes = async (userId) => {
+  const apiUrl = `${URL}/api/Post`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user details');
+    }
+
+    const allPosts = await response.json();
+    let userLikesCount = 0;
+    let userPostsCount = 0;
+
+    allPosts.forEach(p => {
+      if(p.authorId == userId){
+        userLikesCount += p.likes;
+        userPostsCount += 1;
+      }
+    });
+    
+    return {
+      postsCount: userPostsCount,
+      likesCount: userLikesCount,
+    };
+
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    return null;
+  }
+}
+
+
 
 const getAllMembers = async () => {
   const apiUrl = `${URL}/api/User/AllMembers`;
@@ -141,7 +180,7 @@ const createUser = async (user, admin) => {
           body: JSON.stringify(user)
         })
           .then((resp) => {
-            if (resp.status == 201) {
+            if (resp.status == 200) {
               return true
             } else {
               return false
@@ -166,7 +205,7 @@ const createUser = async (user, admin) => {
       body: JSON.stringify(user)
     })
       .then((resp) => {
-        if (resp.status == 201) {
+        if (resp.status == 200) {
           return true
         } else {
           return false
@@ -315,5 +354,6 @@ async function likePost(postId, userId) {
 
 export {
   login, createUser, getData, getAllMembers, checkUserAdmin, deleteUser,
-  getAllPosts, checkIfUserLikedPost, likePost, createPost, deletePost
+  getAllPosts, checkIfUserLikedPost, likePost, createPost, deletePost,
+  getPostsQtandLikes
 }

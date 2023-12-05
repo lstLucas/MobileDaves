@@ -21,6 +21,7 @@ const Login = () => {
         if (resp) {
             AsyncStorage.clear;
             await AsyncStorage.setItem('email', credentials.email);
+            setMsg('');
             navigation.navigate('feedScreen')
         } else {
             setCredentials({ login: "", password: "" })

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { createDrawerNavigator } from "@react-navigation/drawer"
-import { Feather, Ionicons, FontAwesome5 } from "@expo/vector-icons"
+import { Feather, Ionicons, FontAwesome5, Foundation } from "@expo/vector-icons"
 
 
 
@@ -10,6 +10,7 @@ import Feed from '../../view/common/FeedView';
 import Logout from '../../view/logout/LogoutView';
 import Signup from '../../view/register/RegisterView';
 import UsersInformation from '../../view/admin/AllUserView';
+import Dashboard from '../../view/common/DashboardView';
 
 const CustomSideBar= () => {
   const Drawer = createDrawerNavigator()
@@ -23,6 +24,13 @@ const CustomSideBar= () => {
                     options={{title: 'Feed',
                     headerTitle: '',
                     drawerIcon: ()=> <Feather name="home" size={24} />
+                    }}/>
+
+                <Drawer.Screen name="dashboard" 
+                    component={Dashboard}
+                    options={{title: 'Dashboard',
+                    headerTitle: '',
+                    drawerIcon: ()=> <Foundation name="graph-bar" size={24} color="black" />
                     }}/>
 
                 { isAdmin() &&

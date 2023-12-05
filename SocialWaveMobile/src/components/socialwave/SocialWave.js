@@ -6,6 +6,7 @@ import RegisterScreen from "../../view/register/RegisterView"
 import FeedScreen from "../../view/common/FeedView"
 import CustomSideBar from "../sidebar/Sidebar"
 import { PaperProvider } from "react-native-paper"
+import DashboardScreen from "../../view/common/DashboardView"
 
 
 const SocialWave = () => {
@@ -25,6 +26,9 @@ const SocialWave = () => {
 
                     <Stack.Screen name="feedScreen"
                         component={CustomSideBar} options={{ headerShown: false }} />
+
+                    <Stack.Screen name="dashScreen"
+                        component={DashboardScreen} options={{ headerShown: false }} />
 
 
                 </Stack.Navigator>

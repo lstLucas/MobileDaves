@@ -10,14 +10,23 @@ const Signup = () => {
     const navigation = useNavigation();
     const [credentials, setCredentials] = useState({ email: '', password: '', username: '' });
     const [msg, setMsg] = useState('');
+    const [msgSuccess, setMsgSuccess] = useState('');
+
 
     const { isAdmin } = useAuth();
 
-    const signUp =  () => {
-        if(isAdmin())
-            createUser(credentials, true);
-        else
-            createUser(credentials, false);
+    const signUp = async () => {
+        let isAdminUser = isAdmin();
+        let userCreated = await createUser(credentials, isAdminUser);
+        console.log(userCreated);
+    
+        if (userCreated) {
+            setMsgSuccess('Account created');
+            setMsg('');
+        } else {
+            setMsgSuccess('');
+            setMsg('Failed to create account, try again with another email');
+        }
     };
 
     const changeField = (name, value) => {
@@ -39,6 +48,10 @@ const Signup = () => {
                 
                 {(msg !== '') && (
                     <Text style={{ color: 'red' }}>{msg}</Text>
+
+                )}
+                {(msgSuccess != '') && (
+                    <Text style={{ color: 'green' }}>{msgSuccess}</Text>
                 )}
 
                 <View style={styles.card}>
@@ -79,12 +92,15 @@ const Signup = () => {
                     >
                         Sign Up
                     </Button>
+                    {!isAdmin()?
                     <Text style={styles.signupText}>
                         <Text>Already have an account? </Text>
                         <Text style={styles.signupLink} onPress={() => navigation.navigate('loginScreen')}>
                             Log In
                         </Text>
+                        
                     </Text>
+                    : ''}
                 </View>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>

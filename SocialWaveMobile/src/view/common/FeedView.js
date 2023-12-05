@@ -103,6 +103,8 @@ const FeedScreen = () => {
     
             if (postAdded === true) {
                 await reloadPosts();
+                setBody('');
+                setTitle('');
             } else {
                 console.log('Erro ao adicionar o post.');
             }
