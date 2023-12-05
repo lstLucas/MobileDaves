@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { TextInput, Button, Title, Text } from 'react-native-paper';
 import { useAuth } from "../../components/auth/AuthProvider"
@@ -12,9 +12,16 @@ const Login = () => {
 
     const { login } = useAuth()
 
+    useEffect(() => {
+        setCredentials({email:'', password:''});
+    }, []);
+
     const signIn = async () => {
         const resp = await login(credentials.email, credentials.password)
         if (resp) {
+            if(AsyncStorage.getItem('email') != null){
+                await AsyncStorage.clear();
+            }
             await AsyncStorage.setItem('email', credentials.email);
             navigation.navigate('feedScreen')
         } else {
